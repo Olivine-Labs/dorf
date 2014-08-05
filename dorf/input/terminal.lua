@@ -23,5 +23,7 @@ return function terminalInput(msg)
         msg.send(command, data)
       end
     end
-  until command == 'quit'
+  until command == 'exit' or command == 'quit'
+
+  msg.send('exit')
 end

@@ -12,5 +12,6 @@ local map = {
 }
 
 return function(msg, command, data)
-  map[command](msg, data)
+  io.write(map[command](msg, data))
+  io.flush()
 end
