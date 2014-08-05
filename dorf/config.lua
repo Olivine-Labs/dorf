@@ -1,6 +1,6 @@
 return {
   inputs = {
-    'input.terminal'
+    'input.terminal',
   },
   outputs = {
     'output.terminal'

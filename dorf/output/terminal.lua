@@ -5,7 +5,6 @@ end
 local map = {
   move = move,
 }
-
 return function(command, data)
   io.write(map[command](data) .. '\n')
   io.flush()

@@ -34,5 +34,4 @@ return function(msg)
   until command == 'exit'
 
   msg.send('exit')
-
 end

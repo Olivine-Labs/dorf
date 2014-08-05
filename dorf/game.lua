@@ -2,7 +2,7 @@ return function(input, output)
   local g = {}
 
   function g.input()
-    local cmd, data = input.receive(0.001)
+    local cmd, data = input.receive(0)
     if cmd then
       data.speed = 10
       output.send(cmd, data)
@@ -10,6 +10,8 @@ return function(input, output)
   end
 
   function g.run()
+    --TODO
   end
+
   return g
 end
