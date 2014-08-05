@@ -1,3 +1,4 @@
+require('input.terminal.start')
 local stringx = require 'pl.stringx'
 
 local function parse(command)
