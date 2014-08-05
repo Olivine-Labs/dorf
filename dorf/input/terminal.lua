@@ -23,7 +23,7 @@ return function(msg)
   repeat
     command = io.read()
 
-    if command and command ~= 'exit' then
+    if command and command ~= '' and command ~= 'exit' then
       command, data = parse(command)
 
       if command then
