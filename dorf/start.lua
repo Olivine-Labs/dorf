@@ -6,9 +6,7 @@ local inputs, outputs = {}, {}
 for _, v in pairs(config.inputs) do
   local message = require 'message'(l, 'game')
   local input = lanes.require(v)
-  inputs[#inputs+1] = lanes.gen('*', function()
-    input(message)
-  end)
+  inputs[#inputs+1] = lanes.gen('*', input)(message)
 end
 
 for _, v in pairs(config.outputs) do
