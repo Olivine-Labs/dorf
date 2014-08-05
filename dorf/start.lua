@@ -1,30 +1,14 @@
 local lanes = require 'lanes'.configure()
 local l = lanes.linda()
 local config = require 'config'
+local m = lanes.require 'message'
 
 local inputs, outputs = {}, {}
 for _, v in pairs(config.inputs) do
-  local message = require 'message'(l, 'game')
-  local input = lanes.require(v)
-  inputs[#inputs+1] = lanes.gen('*', input)(message)
-end
-
-for _, v in pairs(config.outputs) do
-  local output = lanes.require(v)
-  outputs[#outputs+1] = lanes.gen('*', function()
-    local msg = true
-    local message = require 'message'(l, 'output')
-    repeat
-      msg = message.receive()
-      if msg then
-        output(message, msg.cmd, msg.data)
-      end
-    until not msg
+  local message = m(l, 'game')
+  inputs[#inputs+1] = lanes.gen('*', function()
+    require(v)(message)
   end)()
 end
-
-local game = lanes.gen('*', function()
-  --TODO
-end)
 
 l:receive('exit')
