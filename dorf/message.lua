@@ -7,11 +7,14 @@ return function(l, channel)
     else
       l:send(channel, {cmd, data})
     end
+    print('sent: '..cmd..' to '..channel)
   end
 
-  function m.receive(cmd)
+  function m.receive()
+    print('attempting to receive on '..channel)
     local key, value = l:receive(channel)
-    return value
+    print('received:'..value[1]..' from '..channel)
+    return value[1], value[2]
   end
 
   return m
