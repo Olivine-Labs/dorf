@@ -4,6 +4,8 @@ function parse(command)
   local command, data = command:split(' ', 2)
   local success, command, data = require('input.terminal.' .. command)(data)
 
+  print(command)
+  print(data)
   if success then
     return command, data
   end
@@ -11,7 +13,7 @@ function parse(command)
   return nil
 end
 
-return function terminalInput(msg)
+return function(msg)
   local command
   repeat
     command = io.read()
