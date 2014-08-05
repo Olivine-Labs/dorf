@@ -1,6 +1,3 @@
-require('terminal.start')
-print('wat')
-
 function move(data)
   return data.id .. " moving to " .. data.x .. "," .. data.y .. " at speed " .. data.speed
 end
@@ -10,6 +7,6 @@ local map = {
 }
 
 return function(command, data)
-  io.write(map[command](data))
+  io.write(map[command](data) .. '\n')
   io.flush()
 end
