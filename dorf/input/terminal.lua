@@ -14,16 +14,22 @@ function parse(command)
 end
 
 return function(msg)
-  local command
+  local command = ''
+  local char = ''
+
   repeat
-    command = io.read()
+    char = io.read()
 
-    if command then
-      command, data = parse(command)
+    if char then
+      if char == string.char(13) then
+        command, data = parse(command)
 
-      if command then
-        msg.send(command, data)
+        if command then
+          msg.send(command, data)
+        end
       end
+    else
+      command = command .. char
     end
   until command == 'exit' or command == 'quit'
 
