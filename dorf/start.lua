@@ -1,7 +1,7 @@
 local lanes = require 'lanes'.configure()
 local linda = lanes.linda()
 local config = require 'config'
-local game = require 'game'
+local Game = require 'game'
 local Message = lanes.require 'message'
 local uuid = require 'uuid'
 
@@ -52,16 +52,20 @@ lanes.gen('*', function()
   if not ok then print(err) end
 end)()
 
-lanes.gen('*', function()
+local game = lanes.gen('*', function()
   local ok, err = pcall(function()
-    local message = Message(linda, 'game')
-    local cmd, data
-    repeat
-      cmd, data = message.receive()
-      game(Message(linda, 'output'), cmd, data)
-    until not cmd
+    local ev = require 'ev'
+    local loop = ev.Loop.default
+
+    local game = Game(Message(linda, 'game'), Message(linda, 'output'))
+    local input = ev.Idle.new(game.input)
+    local run = ev.Idle.new(game.run)
+    input:start(loop)
+    run:start(loop)
+    loop:loop()
   end)
   if not ok then print(err) end
 end)()
 
 linda:receive('exit')
+os.exit(0)

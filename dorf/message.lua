@@ -10,10 +10,9 @@ return function(linda, channel)
     print('sent: '..cmd..' to '..channel)
   end
 
-  function m.receive()
-    print('attempting to receive on '..channel)
-    local key, value = linda:receive(channel)
-    print('received:'..value[1]..' from '..channel)
+  function m.receive(timeout)
+    local key, value = linda:receive(timeout, channel)
+    if not value then return nil end
     return value[1], value[2]
   end
 
