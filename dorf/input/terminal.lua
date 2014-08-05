@@ -1,9 +1,11 @@
 local stringx = require 'pl.stringx'
 
 local function parse(command)
-  if command == 'exit' then return command end
-  local command, data = command:split(' ', 2)
-  local success, command, data = require('input.terminal.' .. command)(data)
+  local command, data = stringx.split(command, ' ', 2)
+
+  local success, command, data = pcall(function()
+    return require('input.terminal.' .. command)(data)
+  end)
 
   if success then
     return command, data
@@ -13,19 +15,20 @@ local function parse(command)
 end
 
 return function(msg)
-  local command
+  local command, data
 
   repeat
     command = io.read()
-    print(command)
+    if command then print(command) end
 
-    if command then
-      local command, data = parse(command)
+    if command and command ~= 'exit' then
+      command, data = parse(command)
+
       if command then
         msg.send(command, data)
       end
     end
-  until command == 'exit' or command == 'quit'
+  until command == 'exit'
 
   msg.send('exit')
 end
