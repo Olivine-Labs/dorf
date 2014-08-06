@@ -4,26 +4,40 @@ return function(input, output)
   local world = share()
 
   world.entities = {}
+  world.map = {
+    {
+      {1,1,1,1,1,},
+      {1,0,0,0,1,},
+      {1,0,0,0,1,},
+      {1,0,0,0,1,},
+      {1,1,1,1,1,},
+    }
+  }
   world.entities['1'] = {
     speed = 10,
-    x=1,
-    y=1,
+    x=2,
+    y=2,
     z=1
   }
+  local function move(entity, x, y, z)
+    if world.map[z] and world.map[z][y] and world.map[z][y][x] == 0 then
+      entity.x, entity.y, entity.z = x, y, z
+      return true
+    end
+    return false
+  end
+
   function g.input()
     local cmd, data = input.receive(0)
     if cmd then
-      print(data.id)
       local entity = world.entities[data.id]
-      if data.x then
-        entity.x = entity.x+data.x
-      end
-      if data.y then
-        entity.y = entity.y+data.y
-      end
-      if data.z then
-        entity.z = entity.z+data.z
-      end
+      local x, y, z =
+      data.x and data.x + entity.x or entity.x,
+      data.y and data.y + entity.y or entity.y,
+      data.z and data.z + entity.z or entity.z
+
+      move(entity, x, y, z)
+
       data.speed = entity.speed
       data.x = entity.x
       data.y = entity.y
