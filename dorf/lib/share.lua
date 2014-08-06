@@ -33,7 +33,7 @@ local meta = {
     self.__linda:set(key, value)
   end,
   __len = function(self)
-    local count, n = self.__linda:count()
+    local count, n = self.__linda:count(), 0
     for k in pairs(count) do
       if type(k) == "number" then
         n = n + 1
