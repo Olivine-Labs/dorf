@@ -1,4 +1,4 @@
-local scheduler = require 'scheduler'
+local scheduler = require 'lib.scheduler'
 local config = require 'config'
 local inputs, outputs = {}, {}
 
@@ -35,8 +35,8 @@ local gameId, gameChannel = scheduler.add(function(channel)
   run:start(loop)
 
   set_finalizer(function()
-    loop:unloop()
     run:stop(loop)
+    loop:unloop()
   end)
 
   loop:loop()
