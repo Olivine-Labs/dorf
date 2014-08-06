@@ -1,54 +1,44 @@
-local ll = require 'lanes'.configure({nb_keepers = 10})
-local linda = ll.linda()
-local Channel = require 'channel'(linda)
-local uuid = require 'uuid'
-local s = { Channel = Channel }
-local channels = {}
-local lanes = {}
+local ll = require 'lanes'.configure({nb_keepers=8})
 
-channels['exit'] = Channel('exit')
+return function()
+  local Worker = require 'lib.worker'
+  local Channel = require 'lib.channel'
+  local uuid = require 'uuid'
+  local workers = {}
 
-function s.add(fn)
-  local id = uuid.new()
-  local channel = Channel(id)
-  linda:limit(id, 10000)
-  local lane = ll.gen('*', function()
-    local trace
-    local ok, err = xpcall(
-    function()
-      return fn(channel)
-    end,
-    function(msg)
-      trace = debug.traceback()
-      return msg
-    end)
-    if not ok then print((err and err..'\n' or '')..(trace and trace or '')) end
-    return err
-  end)()
-  lanes[id] = lane
-  channels[id] = channel
-  return id, channel
-end
+  local root = Channel()
 
-function s.get(id)
-  return channels[id]
-end
+  local s = {}
 
-function s.kill(id, timeout)
-  channels[id] = nil
-  if lanes[id] then
-    lanes[id]:cancel(timeout)
+  function s.new(o, id)
+    id = id or uuid.new()
+    local worker = Worker(id, root)
+    workers[id] = worker
+    return worker
   end
-end
 
-function s.killAll(timeout)
-  for id in pairs(channels) do
-    s.kill(id, timeout)
+  function s.get(id)
+    return workers[id].worker
   end
-end
 
-function s.waitForExit()
-  channels['exit'].receive()
-end
+  function s.destroy(id)
+    workers[id].destroy()
+    workers[id] = nil
+  end
 
-return s
+  function s.destroyAll()
+    for _, v in pairs(workers) do
+      v.destroy()
+    end
+  end
+
+  function s.checkExit()
+    return root.receive()
+  end
+
+  function s.channel()
+    return Channel(root)
+  end
+
+  return s
+end

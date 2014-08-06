@@ -1,6 +1,6 @@
 local World = require 'game.entities.world'
 
-return function(input, output)
+return function(output)
   local g = {}
   local world = World({
     dim = {
@@ -18,8 +18,7 @@ return function(input, output)
     return false
   end
 
-  function g.input()
-    local cmd, data = input.receive(0)
+  function g.input(cmd, data)
     if cmd then
       local entity = world.entities[data.id]
       local x, y, z =
@@ -38,7 +37,6 @@ return function(input, output)
   end
 
   function g.run()
-    g.input()
   end
 
   return g

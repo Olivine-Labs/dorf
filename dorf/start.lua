@@ -1,55 +1,63 @@
-local scheduler = require 'lib.scheduler'
+local scheduler = require 'lib.scheduler'()
 local config = require 'config'
+
 local inputs, outputs = {}, {}
 
---register output threads
-for _, v in pairs(config.outputs) do
-  local id, channel = scheduler.add(function(channel)
-    local cmd, data
-    repeat
-      cmd, data = channel.receive()
-      require(v)(cmd, data)
-    until not cmd
-  end)
-  outputs[id] = channel
-end
+local outputChannel = scheduler.channel()
+local gameChannel = scheduler.channel()
 
---register output firehose
-local outputId, outputChannel = scheduler.add(function(channel)
-  local cmd, data
-  repeat
-    cmd, data = channel.receive()
+local ok, err = pcall(function()
+  --register output threads
+  for _, v in pairs(config.outputs) do
+    local worker = scheduler.new()
+    local channel = scheduler.channel()
+    worker.add(function(channel)
+      local cmd, data = channel.receiveAndBlock()
+      if cmd then require(v)(cmd, data) end
+    end, {channel})
+    outputs[worker.id] = channel
+  end
+
+  --register output firehose
+  local outputWorker = scheduler.new()
+  outputWorker.add(function(channel)
+    local cmd, data = channel.receiveAndBlock()
     for _, v in pairs(outputs) do
       v.send(cmd, data)
     end
-  until not cmd
-end)
+  end, {outputChannel})
 
---register game
-local gameId, gameChannel = scheduler.add(function(channel)
-  local ev = require 'ev'
-  local loop = ev.Loop.default
-
-  local game = require 'game'(channel, outputChannel)
-  local run = ev.Idle.new(game.run)
-  run:start(loop)
-
-  set_finalizer(function()
-    run:stop(loop)
-    loop:unloop()
+  --register game
+  local gameWorker = scheduler.new()
+  gameWorker.add(function()
+    local game = require 'game'(outputChannel)
+    while true do
+      local cmd, data = gameChannel.receiveAndBlock()
+      if cmd == 'tick' then
+        game.run()
+      else
+        game.input(cmd, data)
+      end
+    end
   end)
 
-  loop:loop()
+  --register input threads
+  for _, v in pairs(config.inputs) do
+    local worker = scheduler.new()
+    worker.add(function() require(v)(gameChannel) end)
+    inputs[worker.id] = channel
+  end
+
+  local socket = require 'socket'
+  local exit
+  repeat
+    gameChannel.send('tick')
+    socket.sleep(0.01)
+    exit = scheduler.checkExit()
+  until exit
 end)
 
---register input threads
-for _, v in pairs(config.inputs) do
-  local id, channel = scheduler.add(function(channel) require(v)(gameChannel) end)
-  inputs[id] = channel
-end
-
-scheduler.waitForExit()
-
-scheduler.killAll()
+print(err)
+scheduler.destroyAll()
 
 os.exit(0)
