@@ -31,15 +31,12 @@ local gameId, gameChannel = scheduler.add(function(channel)
   local loop = ev.Loop.default
 
   local game = require 'game'(channel, outputChannel)
-  local input = ev.Idle.new(game.input)
   local run = ev.Idle.new(game.run)
-  input:start(loop)
   run:start(loop)
 
   set_finalizer(function()
     loop:unloop()
-    input:stop()
-    run:stop()
+    run:stop(loop)
   end)
 
   loop:loop()

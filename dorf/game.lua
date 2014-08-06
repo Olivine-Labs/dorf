@@ -1,5 +1,7 @@
+local share = require 'lib.share'
 return function(input, output)
   local g = {}
+  local world = share()
 
   function g.input()
     local cmd, data = input.receive(0)
@@ -10,7 +12,7 @@ return function(input, output)
   end
 
   function g.run()
-    --TODO
+    g.input()
   end
 
   return g

@@ -2,7 +2,6 @@ local ll = require 'lanes'.configure()
 local linda = ll.linda()
 local Channel = require 'channel'(linda)
 local uuid = require 'uuid'
-
 local s = { Channel = Channel }
 local channels = {}
 local lanes = {}
@@ -12,6 +11,7 @@ channels['exit'] = Channel('exit')
 function s.add(fn)
   local id = uuid.new()
   local channel = Channel(id)
+  linda:limit(id, 10000)
   local lane = ll.gen('*', function()
     local trace
     local ok, err = xpcall(
