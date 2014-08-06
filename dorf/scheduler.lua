@@ -1,4 +1,4 @@
-local ll = require 'lanes'.configure()
+local ll = require 'lanes'.configure({nb_keepers = 10})
 local linda = ll.linda()
 local Channel = require 'channel'(linda)
 local uuid = require 'uuid'
