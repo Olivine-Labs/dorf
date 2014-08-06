@@ -1,24 +1,15 @@
-local share = require 'lib.share'
+local World = require 'game.entities.world'
+
 return function(input, output)
   local g = {}
-  local world = share()
-
-  world.entities = {}
-  world.map = {
-    {
-      {1,1,1,1,1,},
-      {1,0,0,0,1,},
-      {1,0,0,0,1,},
-      {1,0,0,0,1,},
-      {1,1,1,1,1,},
+  local world = World({
+    dim = {
+      x = 5,
+      y = 5,
+      z = 5
     }
-  }
-  world.entities['1'] = {
-    speed = 10,
-    x=2,
-    y=2,
-    z=1
-  }
+  })
+
   local function move(entity, x, y, z)
     if world.map[z] and world.map[z][y] and world.map[z][y][x] == 0 then
       entity.x, entity.y, entity.z = x, y, z
