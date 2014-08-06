@@ -31,6 +31,15 @@ local meta = {
       end
     end
     self.__linda:set(key, value)
+  end,
+  __len = function(self)
+    local count, n = self.__linda:count()
+    for k in pairs(count) do
+      if type(k) == "number" then
+        n = n + 1
+      end
+    end
+    return n
   end
 }
 
