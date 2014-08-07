@@ -12,7 +12,6 @@ description = {
   license = "MIT <http://opensource.org/licenses/MIT>"
 }
 dependencies = {
-  "lua-ev == scm-1",
   "lanes >= 3.9.6-1",
   "lua >= 5.1",
   "uuid >= 0.2-1",
