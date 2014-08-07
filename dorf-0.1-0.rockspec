@@ -13,6 +13,7 @@ description = {
 }
 dependencies = {
   "lanes >= 3.9.6-1",
+  "luasocket >= 3.0rc1-1",
   "lua >= 5.1",
   "uuid >= 0.2-1",
   "penlight >= 1.3.1-1",
