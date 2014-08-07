@@ -3,7 +3,6 @@ local config = require 'config'
 
 local inputs, outputs = {}, {}
 
-local outputChannel = scheduler.channel()
 local gameChannel = scheduler.channel()
 
 local ok, err = pcall(function()
@@ -18,14 +17,7 @@ local ok, err = pcall(function()
     outputs[worker.id] = channel
   end
 
-  --register output firehose
-  local outputWorker = scheduler.new()
-  outputWorker.add(function(channel)
-    local cmd, data = channel.receiveAndBlock()
-    for _, v in pairs(outputs) do
-      v.send(cmd, data)
-    end
-  end, {outputChannel})
+  local outputChannel = scheduler.channelFacade(outputs)
 
   --register game
   local gameWorker = scheduler.new()
@@ -57,7 +49,8 @@ local ok, err = pcall(function()
   until exit
 end)
 
-print(err)
+if err then print(err) end
+
 scheduler.destroyAll()
 
 os.exit(0)

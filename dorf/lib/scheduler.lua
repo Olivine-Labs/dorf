@@ -40,5 +40,15 @@ return function()
     return Channel(root)
   end
 
+  function s.channelFacade(channels)
+    local c = {}
+    c.send = function(cmd, data)
+      for _, v in pairs(channels) do
+        v.send(cmd, data)
+      end
+    end
+    return c
+  end
+
   return s
 end

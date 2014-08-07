@@ -3,7 +3,7 @@ local ll = require 'lanes'
 return function(root)
   local c = {}
   local linda = ll.linda()
-
+  linda:limit('channel', 10000)
   function c.send(cmd, data)
     if root and cmd == 'exit' then
       root.send(cmd, data)
