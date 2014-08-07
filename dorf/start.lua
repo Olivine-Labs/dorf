@@ -1,4 +1,5 @@
-local scheduler = require 'lib.scheduler'()
+local Scheduler = require 'lib.scheduler'
+local scheduler = Scheduler()
 local config = require 'config'
 
 local inputs, outputs = {}, {}
@@ -8,21 +9,20 @@ local gameChannel = scheduler.channel()
 local ok, err = pcall(function()
   --register output threads
   for _, v in pairs(config.outputs) do
-    local worker = scheduler.new()
     local channel = scheduler.channel()
-    worker.add(function(channel)
+    scheduler.add(function(channel)
       local cmd, data = channel.receiveAndBlock()
       if cmd then require(v)(cmd, data) end
-    end, {channel})
-    outputs[worker.id] = channel
+    end, {channel}, 100)
+    outputs[#outputs+1] = channel
   end
 
   local outputChannel = scheduler.channelFacade(outputs)
 
   --register game
-  local gameWorker = scheduler.new()
-  gameWorker.add(function()
-    local game = require 'game'(outputChannel)
+  scheduler.add(function()
+    local s = Scheduler()
+    local game = require 'game'(s, outputChannel)
     while true do
       local cmd, data = gameChannel.receiveAndBlock()
       if cmd == 'tick' then
@@ -31,13 +31,11 @@ local ok, err = pcall(function()
         game.input(cmd, data)
       end
     end
-  end)
+  end, {}, 100)
 
   --register input threads
   for _, v in pairs(config.inputs) do
-    local worker = scheduler.new()
-    worker.add(function() require(v)(gameChannel) end)
-    inputs[worker.id] = channel
+    scheduler.add(function() require(v)(gameChannel) end, {}, 100)
   end
 
   local socket = require 'socket'
@@ -51,6 +49,6 @@ end)
 
 if err then print(err) end
 
-scheduler.destroyAll()
+scheduler.destroy()
 
-os.exit(0)
+os.exit(err and 1 or 0)

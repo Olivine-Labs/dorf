@@ -16,8 +16,14 @@ return function(id, root)
       local loop = ev.Loop.new()
       local work = {}
       local input = ev.Idle.new(function(loop, input, revents)
-        local cmd, data = channel.receive()
-        if not cmd then 
+        local cmd, data
+        if next(work) ~= nil then
+          cmd, data = channel.receive()
+        else
+          --if there's no work, block until a command comes in to add work
+          cmd, data = channel.receiveAndBlock()
+        end
+        if not cmd then
           for _, v in pairs(work) do
             v.fn(unpack(v.args))
           end
@@ -46,6 +52,7 @@ return function(id, root)
   w.lane = lane
   w.channel = channel
   w.id = id
+  w.load = 0
 
   function w.destroy()
     channel.send('destroy')

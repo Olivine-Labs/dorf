@@ -1,7 +1,8 @@
 local World = require 'game.entities.world'
 
-return function(output)
+return function(scheduler, output)
   local g = {}
+
   local world = World({
     dim = {
       x = 5,
@@ -9,6 +10,7 @@ return function(output)
       z = 5
     }
   })
+  scheduler.workers(8)
 
   local function move(entity, x, y, z)
     if world.map[z] and world.map[z][y] and world.map[z][y][x] == 0 then
