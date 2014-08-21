@@ -33,8 +33,20 @@ local function buildMap(x,y,z)
   return map
 end
 
+local function getTileWeight(self, x, y, z)
+  -- check bounds
+
+  if x > self.dim.x or y > self.dim.y or z > self.dim.z
+     or x < 1 or y < 1 or z < 0 then
+
+    return 1
+  end
+
+  return 0
+end
+
 local function World(parameters)
-  world = Base()
+  local world = Base()
 
   world.dim = {
     x = parameters.dim.x or 5,
@@ -54,6 +66,8 @@ local function World(parameters)
     y=2,
     z=1
   }
+
+  world.getTileWeight = getTileWeight
 
   return world
 end

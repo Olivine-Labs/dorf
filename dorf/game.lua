@@ -13,10 +13,12 @@ return function(scheduler, output)
   scheduler.workers(8)
 
   local function move(entity, x, y, z)
-    if world.map[z] and world.map[z][y] and world.map[z][y][x] == 0 then
+
+    if world:getTileWeight(x,y,z) < 1 then
       entity.x, entity.y, entity.z = x, y, z
       return true
     end
+
     return false
   end
 
